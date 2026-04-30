@@ -5,7 +5,6 @@ import type { OllamaService, OllamaMessage } from './ollama.service'
 import type { SourceChunk } from '../../renderer/src/types'
 import { ragLog, separator } from '../utils/logger'
 
-const SCORE_THRESHOLD = 0.5
 const TOP_K = 6
 const HISTORY_TURNS = 4
 
@@ -51,14 +50,11 @@ export class RagService {
 
     // ── Step 2: Vector similarity search ───────────────────────────────────
     const t2 = Date.now()
-    const rawResults = await this.vector.searchChunks(queryVector, topicId, TOP_K)
-    const retrieved = rawResults.filter((r) => r._distance <= SCORE_THRESHOLD)
+    const retrieved = await this.vector.searchChunks(queryVector, topicId, TOP_K)
 
-    ragLog.info(
-      `🎯 VECTOR SEARCH : ${rawResults.length} candidates → ${retrieved.length} kept (threshold ≤ ${SCORE_THRESHOLD}) (${ms(t2)})`
-    )
+    ragLog.info(`🎯 VECTOR SEARCH : ${retrieved.length} chunks returned (${ms(t2)})`)
 
-    if (rawResults.length === 0) {
+    if (retrieved.length === 0) {
       ragLog.warn('   ⚠ No vectors found for this topic — are documents ingested?')
     }
 
@@ -82,7 +78,7 @@ export class RagService {
     } else {
       sources.forEach((s, i) => {
         const page = s.pageNumber !== undefined ? ` p.${s.pageNumber}` : ''
-        ragLog.info(`   #${i + 1} score=${s.score.toFixed(4)} | ${s.filename}${page}`)
+        ragLog.info(`   #${i + 1} similarity=${s.score.toFixed(4)} dist=${retrieved[i]._distance.toFixed(4)} | ${s.filename}${page}`)
         ragLog.debug(`        "${preview(s.text, 200)}"`)
       })
     }
