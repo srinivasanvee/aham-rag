@@ -232,7 +232,7 @@ export class DatabaseService {
   getRecentMessages(conversationId: string, limit: number): MessageRow[] {
     return this.conn
       .prepare(
-        'SELECT * FROM messages WHERE conversation_id = ? ORDER BY created_at DESC LIMIT ?'
+        'SELECT * FROM messages WHERE conversation_id = ? ORDER BY rowid DESC LIMIT ?'
       )
       .all(conversationId, limit)
       .reverse() as MessageRow[]

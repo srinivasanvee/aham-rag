@@ -74,7 +74,7 @@ function applyOverlap(chunks: string[], originalText: string, chunkOverlap: numb
 
   for (let i = 0; i < chunks.length; i++) {
     const chunkText = chunks[i]
-    const overlapPrefix = i > 0 ? chunks[i - 1].slice(-chunkOverlap) : ''
+    const overlapPrefix = i > 0 && chunkOverlap > 0 ? chunks[i - 1].slice(-chunkOverlap) : ''
     const fullText = overlapPrefix ? overlapPrefix + ' ' + chunkText : chunkText
 
     const startChar = originalText.indexOf(chunkText, searchFrom)
